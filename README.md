@@ -81,3 +81,24 @@ YouTube Shorts naturally carry a higher proportion of clickbait and non-educatio
 
 4. **Direct URL / Video ID Bypass:**
    * Users can paste a direct YouTube URL or Video ID to immediately load any specific video into the distraction-free player with **zero LLM tokens consumed**.
+   * 
+## ⚙️ Scalability, Rate-Limiting & API Cost Optimization
+
+As traffic grows, relying solely on free-tier LLM API limits can lead to `429 Too Many Requests` errors. FocusTube uses a multi-layered backend infrastructure to optimize response times, prevent rate-limiting failures, and minimize API operating costs.
+
+### 🛡️ System Architecture & Fallback Flow
+[User Search Query]
+│
+▼
+┌──────────────────────────────┐
+│  Redis / Database Cache      │ ── (Hit: <50ms) ──► [Return Cached Results]
+└──────────────┬───────────────┘
+│ (Miss)
+▼
+┌──────────────────────────────┐
+│  Gemini API (Rate Check)     │ ── (Success) ───► [Save to Cache & Return]
+└──────────────┬───────────────┘
+│ (429 Error / Quota Exhausted)
+▼
+┌──────────────────────────────┐
+│  Graceful Fallback Mode      │ ──► [Return Standard YT Results (AI Paused)]
